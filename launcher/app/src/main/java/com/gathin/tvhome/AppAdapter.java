@@ -80,6 +80,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         int ambient;
         /** uniform_tiles card fill, top and bottom colour; null until sampled from the icon. */
         int[] backdrop;
+        /** Monochrome icons (Look): the banner's (or icon's) logo alone, in white; null until first shown. */
+        Drawable whiteLogo;
 
         Entry(String label, ComponentName component, Drawable banner, Drawable icon) {
             this(APP, label, component, banner, icon, null, 0);
@@ -222,6 +224,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Set<String> iconTiles;
     private final List<Entry> items = new ArrayList<>();
 
+    /** Monochrome icons with a white accent (Look.monoIcons). */
+    private final boolean mono;
+
     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
         this.ctx = ctx;
         this.listener = listener;
@@ -248,6 +253,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.appLabels = cfg.appLabels;
         this.appBanners = cfg.appBanners;
         this.uniformTiles = cfg.uniformTiles;
+        this.mono = Look.monoIcons(ctx);
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
         // its view being rebound to whatever app now sits in that slot.
         setHasStableIds(true);
@@ -508,6 +514,21 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.label.setText(e.label);
             h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
         }
+        h.mono = mono;
+        if (mono) {
+            // The app's logo alone, in white, on a glass card (worked out once per app, then kept).
+            if (e.whiteLogo == null) e.whiteLogo = Look.whiteLogo(ctx.getResources(), e.banner != null ? e.banner : e.icon);
+            if (e.whiteLogo != null) {
+                h.card.setBackground(Look.glassCard());
+                h.banner.setImageDrawable(e.whiteLogo);
+                h.banner.setVisibility(View.VISIBLE);
+                h.icon.setVisibility(View.GONE);
+                h.label.setVisibility(View.GONE);
+            }
+            Look.focus(focused, h.banner);
+        } else {
+            h.banner.setAlpha(1f);
+        }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
             if (tileMenu) {
@@ -682,6 +703,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /** A vivid colour sampled from the app's banner (or icon), cached per entry; a card's accent when it set one. */
     int ambientColorAt(int position) {
         if (position < 0 || position >= items.size()) return 0xFF444444;
+        if (mono) return Look.MONO_ACCENT;   // grey icons get a white glow instead of the app's colour
         Entry e = items.get(position);
         if (e.ambient == 0) {
             e.ambient = uniformTiles && e.banner == null ? dominantColor(e.icon) : vividColor(e.banner != null ? e.banner : e.icon);
@@ -915,6 +937,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final boolean overshoot;
         /** A dock tile: it grows in place without advanced_effects' lift, which reads as off-centre in the band (#2135). */
         boolean inDock;
+        /** Monochrome icons: the white logo brightens to full white on focus (Look). */
+        boolean mono;
 
         Holder(View v, TileListener listener, boolean animations, boolean advancedEffects,
                boolean reducedMotion, float restNameAlpha, boolean overshoot) {
@@ -953,6 +977,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 view.animate().cancel();
                 banner.animate().cancel();
                 name.animate().cancel();
+                if (mono) Look.focus(focused, banner);
                 float scale = !animations ? 1f : advancedEffects ? 1.12f : 1.10f;
                 float s = focused ? scale : 1f;
                 if (!animations) {

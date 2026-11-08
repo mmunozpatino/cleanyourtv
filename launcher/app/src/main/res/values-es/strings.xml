@@ -44,7 +44,56 @@
     <string name="dream_name">Reloj</string>
     <string name="launcher_settings">Ajustes del lanzador</string>
     <string name="native_settings">Ajustes del fabricante</string>
-    <string name="columns_label">Aplicaciones por fila</string>
+    <string name="customize">Personalizar</string>
+    <string name="layout_label">Disposición</string>
+    <string name="layout_grid">Cuadrícula</string>
+    <string name="layout_row">En línea</string>
+    <string name="icons_label">Íconos</string>
+    <string name="icons_color">Originales</string>
+    <string name="icons_mono">Monocromo</string>
+    <string name="glass_label">Efecto vidrio</string>
+    <string name="wallpaper_theme_picture">Dragón al atardecer</string>
+    <string name="glass_off">No</string>
+    <string name="glass_clear">Claro</string>
+    <string name="glass_medium">Medio</string>
+    <string name="glass_dense">Denso</string>
+    <string name="app_box_label">Caja de apps</string>
+    <string name="app_box_size_label">Tamaño de la caja</string>
+    <string name="size_small">Chica</string>
+    <string name="size_normal">Normal</string>
+    <string name="size_large">Grande</string>
+    <string-array name="greetings_morning">
+        <item>Buen día, %1$s</item>
+        <item>Arriba, %1$s</item>
+        <item>Hola, %1$s, ¿arrancamos?</item>
+        <item>Que tengas un lindo día, %1$s</item>
+        <item>Buenos días, %1$s</item>
+        <item>¿Mate y algo para ver, %1$s?</item>
+    </string-array>
+    <string-array name="greetings_afternoon">
+        <item>Buenas tardes, %1$s</item>
+        <item>Hola, %1$s</item>
+        <item>¿Qué vemos hoy, %1$s?</item>
+        <item>¿Cómo va la tarde, %1$s?</item>
+        <item>Hora de la merienda, %1$s</item>
+        <item>Qué bueno verte, %1$s</item>
+    </string-array>
+    <string-array name="greetings_evening">
+        <item>Buenas noches, %1$s</item>
+        <item>Hola de nuevo, %1$s</item>
+        <item>¿Peli o serie, %1$s?</item>
+        <item>Noche de series, %1$s</item>
+        <item>A relajarse, %1$s</item>
+        <item>Te estaba esperando, %1$s</item>
+    </string-array>
+    <string-array name="greetings_night">
+        <item>Buenas noches, %1$s</item>
+        <item>¿Trasnochando, %1$s?</item>
+        <item>¿Un capítulo más, %1$s?</item>
+        <item>A descansar pronto, %1$s</item>
+        <item>Dulces sueños, %1$s</item>
+    </string-array>
+    <string name="columns_label">Aplicaciones por fila (tamaño de íconos)</string>
     <string name="dock_opacity_label">Opacidad de la barra del dock</string>
     <string name="animations_state">Animaciones: %1$s</string>
     <string name="advanced_effects">Efectos avanzados</string>

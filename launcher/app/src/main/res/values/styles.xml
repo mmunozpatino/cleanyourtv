@@ -7,6 +7,16 @@
     </style>
 
     <!-- Frosted pill, tvOS style. -->
+    <!-- Launcher settings as a glass side panel over Home: the window is translucent and undimmed, so Home and every
+         change made in the panel stay in view. LauncherSettingsActivity sizes it to the right edge. -->
+    <style name="Theme.TvHome.Panel" parent="Theme.TvHome">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
     <style name="TopButtonBase">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">42dp</item>

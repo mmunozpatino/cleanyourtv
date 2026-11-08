@@ -62,8 +62,12 @@ final class WallpaperPlayer {
     private LocalDate sunDay;
     private int[] sun;
 
+    /** Frosted glass on (Look.frostedGlass): each decoded picture also gets a small blurred copy. */
+    private final boolean glass;
+
     WallpaperPlayer(Context context, FrameLayout root, Config config) {
         this.root = root;
+        glass = Look.frostedGlass(context);
         backgroundColor = config.backgroundColor;
         files = new ArrayList<>(config.wallpapers);
         interval = config.wallpaperRotationMinutes * 60_000L;
@@ -266,6 +270,7 @@ final class WallpaperPlayer {
         // The wallpaper covers the whole root; avoid drawing the fallback colour under it.
         root.setBackground(null);
         image.setImageBitmap(bitmap);
+        if (glass) FrostedGlass.show(bitmap, image);
         if (old != null && old != bitmap) image.postDelayed(old::recycle, 500);
     }
 
@@ -294,6 +299,7 @@ final class WallpaperPlayer {
             // One copy in GPU memory instead of a software bitmap plus its texture; the decode stays off the UI
             // thread for rotations, and Home's return no longer uploads 4-8 MB to the GPU.
             Bitmap gpu = decoded.copy(Bitmap.Config.HARDWARE, false);
+            if (glass) FrostedGlass.make(decoded, gpu != null ? gpu : decoded);
             if (gpu == null) return decoded;
             decoded.recycle();
             return gpu;

@@ -17,10 +17,10 @@
 
     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
     <string-array name="dock_apps">
+        <item>com.wbd.stream</item>
+        <item>com.disney.disneyplus</item>
         <item>com.netflix.ninja</item>
-        <item>com.amazon.amazonvideo.livingroom</item>
         <item>com.google.android.youtube.tv</item>
-        <item>in.startv.hotstar</item>
     </string-array>
     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
@@ -31,10 +31,11 @@
     <string-array name="hidden_apps">
         <item>com.mediatek.wwtv.tvcenter</item>
         <item>com.mitv.gallery</item>
+        <item>com.tcl.tv</item>
     </string-array>
 
     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
-    <string name="live_tv_package" translatable="false">com.mediatek.wwtv.tvcenter</string>
+    <string name="live_tv_package" translatable="false">com.tcl.tv</string>
 
     <!-- Open the Live TV app above the first time Home comes up after the TV is switched on, for sets that are
          mostly used for broadcast TV. Once per boot: Home after that stays Home. Can also be set with
@@ -303,6 +304,18 @@
     <!-- A direct Launcher settings action instead of TV Settings in the header (or top_menu).
          Off by default; a theme can set "launcher_settings_button": true. -->
     <bool name="launcher_settings_button">false</bool>
+    <!-- A "Customize" pill next to TV Settings in the header that opens Launcher settings (layout, apps per row,
+         rows below the dock, dock opacity, wallpaper). Kept beside TV Settings instead of replacing it. -->
+    <bool name="customize_button">true</bool>
+    <!-- App icons in grey with a white accent on the focused tile (also in Launcher settings, "Icons"). -->
+    <bool name="mono_icons">false</bool>
+    <!-- Frosted glass behind the dock band and the top pills: a small blurred copy of the wallpaper, made once when
+         the wallpaper loads and drawn through a BitmapShader, plus a sheen and a rim. No live blur, so no cost while
+         moving around. Only with a wallpaper. Also in Launcher settings, "Glass effect". -->
+    <bool name="frosted_glass">true</bool>
+    <!-- With greeting_name set, a different greeting line each hour from greetings_morning/afternoon/evening/night
+         (strings.xml) instead of the fixed "Good evening, <name>". -->
+    <bool name="varied_greetings">true</bool>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
          also be set with "dock_glass": true in a theme's config.json. -->
@@ -374,7 +387,7 @@
          ports show none. For TVs whose port states land on the wrong port: TCL UnionTV (Android 9) reports the empty
          HDMI 1 as connected and a device on HDMI 2 nowhere, while its CEC device list stays right. A device without
          CEC then shows no state at all. Off by default. Can also be set with "inputs_cec_state_only" in a theme. -->
-    <bool name="inputs_cec_state_only">false</bool>
+    <bool name="inputs_cec_state_only">true</bool>
     <!-- Names under every tile, not only the focused one: unfocused names stay dimmed, the focused one is full white.
          With dock_row the band grows down to hold the dock's names too. -->
     <bool name="always_show_names">false</bool>

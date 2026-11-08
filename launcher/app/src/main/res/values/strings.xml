@@ -50,6 +50,48 @@
     <string name="home_settings_help">Select your original home to stop using CleanYourTV as Home, or CleanYourTV to switch back. The original launcher must be enabled and your TV must provide a home picker; use the restore script first if it was disabled.</string>
     <string name="launcher_settings">Launcher settings</string>
     <string name="native_settings">Native settings</string>
+    <string name="customize">Customize</string>
+    <string name="layout_label">Layout</string>
+    <string name="layout_grid">Grid</string>
+    <string name="layout_row">One row</string>
+    <string name="icons_label">Icons</string>
+    <string name="icons_color">Colour</string>
+    <string name="icons_mono">Monochrome</string>
+    <string name="glass_label">Glass effect</string>
+    <string name="wallpaper_theme_picture">Theme picture</string>
+    <string name="glass_off">Off</string>
+    <string name="glass_clear">Clear</string>
+    <string name="glass_medium">Medium</string>
+    <string name="glass_dense">Frosted</string>
+    <string name="app_box_label">App box</string>
+    <string name="app_box_size_label">App box size</string>
+    <string name="size_small">Compact</string>
+    <string name="size_normal">Normal</string>
+    <string name="size_large">Roomy</string>
+    <string-array name="greetings_morning">
+        <item>Good morning, %1$s</item>
+        <item>Rise and shine, %1$s</item>
+        <item>Hello, %1$s</item>
+        <item>Have a lovely day, %1$s</item>
+    </string-array>
+    <string-array name="greetings_afternoon">
+        <item>Good afternoon, %1$s</item>
+        <item>Hi there, %1$s</item>
+        <item>What are we watching, %1$s?</item>
+        <item>Hope your day is going well, %1$s</item>
+    </string-array>
+    <string-array name="greetings_evening">
+        <item>Good evening, %1$s</item>
+        <item>Welcome back, %1$s</item>
+        <item>Movie night, %1$s?</item>
+        <item>Time to relax, %1$s</item>
+    </string-array>
+    <string-array name="greetings_night">
+        <item>Good night, %1$s</item>
+        <item>Up late, %1$s?</item>
+        <item>One more episode, %1$s?</item>
+        <item>Sweet dreams soon, %1$s</item>
+    </string-array>
     <string name="columns_label">Apps per row</string>
     <string name="rows_below_dock_label">Rows below dock</string>
     <string name="dock_opacity_label">Dock band opacity</string>

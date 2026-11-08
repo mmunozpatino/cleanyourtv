@@ -19,6 +19,12 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private final Paint band = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edge = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
+    /** Paint for the blurred wallpaper behind the band (FrostedGlass). */
+    private final Paint glass = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    /** Look.frostedGlass, read on the first draw. */
+    private Boolean frosted;
+    /** Look.appBoxPadding: the app box's padding scale, read on the first draw with frosted. */
+    private float boxPadding = 1f;
 
     /** Extra band below the tiles for their names (always_show_names), in px. */
     private final float namesRoom;
@@ -110,13 +116,19 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             }
         }
         if (!any) return;
-        float pad = 14 * density;
+        if (frosted == null) {
+            frosted = Look.frostedGlass(parent.getContext());
+            boxPadding = Look.appBoxPadding(parent.getContext());
+            if (frosted) FrostedGlass.watch(parent);
+        }
+        // The app box's size (Look): its padding around the tiles, compact to roomy.
+        float pad = 14 * density * boxPadding;
         // The band can only draw inside the grid, and the first and last dock tiles sit 12dp in from its
         // edges: a full 14dp at the sides sliced the rounded ends flat (#454). Keep the sides, with the
         // 1dp edge line, inside the grid; the top and bottom have room.
         // 22dp at the sides (the grid's 10dp padding makes room): a focused first or last tile grows about 7dp
         // outwards and still keeps about the band's top margin from its rounded end.
-        float sidePad = 22 * density;
+        float sidePad = 22 * density * boxPadding;
         float side = Math.max(0f, Math.min(sidePad, Math.min(rect.left, parent.getWidth() - rect.right) - density));
         float radius = AppAdapter.cornerRadius(cardWidth, density);
         if (evenPadding) {
@@ -139,9 +151,11 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             rect.right = Math.min(rect.right, parent.getWidth() - density);
         }
         rect.bottom += namesRoom;
+        // Frosted glass (Look): the blurred wallpaper behind the band first, then the tint, sheen and rim on top.
+        if (frosted) FrostedGlass.draw(c, parent, rect, radius, glass);
         if (lightGlass && (rect.top != shaderTop || rect.bottom != shaderBottom)) {
             // The pills' glass (pill_bg: white, 18% fading to 8%), a little fainter over this much larger area.
-            band.setShader(new LinearGradient(0, rect.top, 0, rect.bottom, 0x24FFFFFF, 0x0DFFFFFF,
+            band.setShader(new LinearGradient(0, rect.top, 0, rect.bottom, 0x16FFFFFF, 0x06FFFFFF,
                     Shader.TileMode.CLAMP));
             shaderTop = rect.top;
             shaderBottom = rect.bottom;

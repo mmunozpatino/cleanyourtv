@@ -470,6 +470,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // off the list (needs WRITE_SECURE_SETTINGS, granted by build-and-install with RESTORE_KEY_SERVICES=1).
         if (cfg.restoreKeyServices) ServiceRepair.restore(this);
         settingsRevision = settingsRevision();
+        live = new java.lang.ref.WeakReference<>(this);
         applyViewInputsHandler(cfg.handleViewInputs);
         settingsKeycodes = cfg.settingsKeycodes;
         settingsKeyPanel = cfg.settingsKeyPanel;
@@ -509,6 +510,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // black under it is a second full-screen fill on every frame for nothing. The starting window still uses
         // the theme's background, so launch looks the same.
         getWindow().setBackgroundDrawable(null);
+        FrostedGlass.reset();   // a recreate (new settings, new theme) starts without the old picture's glass
+        FrostedGlass.setOpacity(Look.glassOpacity(this));
         wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
         sky = findViewById(R.id.sky);
         sky.setIntensity(cfg.skyIntensity);
@@ -893,6 +896,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             showSettingsMenu();
             return true;
         });
+        // A Customize pill next to TV Settings that opens Launcher settings (config.xml customize_button).
+        View btnCustomize = findViewById(R.id.btnCustomize);
+        if (getResources().getBoolean(R.bool.customize_button) && !topMenu && !launcherSettingsButton) {
+            btnCustomize.setVisibility(View.VISIBLE);
+            // Icon only, so the date beside the clock keeps its room; the name is its content description.
+            btnCustomize.setContentDescription(getString(R.string.customize));
+            makeIconOnly((TextView) btnCustomize);
+            btnCustomize.setOnClickListener(v -> startActivityForResult(
+                    new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
+        }
 
         // Keep focus on the top bar at its ends and at the top: Android's focus finder would otherwise
         // jump to a tile far below when there is nothing in that direction.
@@ -917,9 +930,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnSettings.setOnKeyListener(pillKeys);
         btnReorder.setOnKeyListener(pillKeys);
         btnLibraryTop.setOnKeyListener(pillKeys);
+        btnCustomize.setOnKeyListener(pillKeys);
         for (View button : topAppButtons) button.setOnKeyListener(pillKeys);
         if (advancedEffects) {
-            List<View> pills = new ArrayList<>(Arrays.asList(btnInputs, btnWifi, btnVpn, btnReorder, btnLibraryTop, btnSettings));
+            List<View> pills = new ArrayList<>(Arrays.asList(btnInputs, btnWifi, btnVpn, btnReorder, btnLibraryTop, btnCustomize, btnSettings));
             pills.addAll(topAppButtons);
             for (View button : pills) {
                 button.setOnFocusChangeListener((view, focused) -> view.animate()
@@ -928,6 +942,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         }
         if (festive) applyFestiveSkin((TextView) btnInputs, (TextView) btnSettings);
+        // Frosted glass under the top pills (Look): the blurred wallpaper behind each one.
+        if (Look.frostedGlass(this)) {
+            for (View pill : Arrays.asList(btnInputs, btnWifi, btnReorder, btnLibraryTop, btnCustomize, btnSettings)) {
+                FrostedPill.apply(pill, density);
+            }
+        }
 
         // Hide the glass when focus leaves the tiles.
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener((oldF, newF) -> {
@@ -1146,6 +1166,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         }
     }
+
+    /** TCL's vendor keycode for the remote's Apps button (TCL_RC802VEM on a UnionTV, Android 9). */
+    private static final int TCL_APPS_KEY = 4082;
+
+    /** The Home on screen, for the settings side panel to rebuild it live behind itself. */
+    private static java.lang.ref.WeakReference<MainActivity> live = new java.lang.ref.WeakReference<>(null);
+
+    /**
+     * Launcher settings is a side panel over Home: rebuild Home behind it after each change, so the change shows at
+     * once. The rebuilt Home starts with the new change count, so it does not rebuild a second time on resume.
+     */
+    static void refreshBehindPanel() {
+        MainActivity home = live.get();
+        if (home == null || home.isFinishing() || home.isDestroyed()) return;
+        home.handler.removeCallbacks(home.panelRefresh);
+        home.handler.postDelayed(home.panelRefresh, 120);   // a burst of presses rebuilds once
+    }
+
+    private final Runnable panelRefresh = () -> {
+        if (isFinishing() || isDestroyed()) return;
+        settingsRecreationPending = true;
+        settingsRevision = settingsRevision();
+        recreate();
+    };
 
     /** Launcher settings' change count (Config.SETTINGS_REVISION_KEY); onResume rebuilds Home when it moved. */
     private long settingsRevision() {
@@ -1432,6 +1476,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // taken after that would arm one nothing releases.
         if (resumed && event.getKeyCode() >= 1000 && RemoteKeys.handle(this, event, homeAppKeys.get(event.getKeyCode()),
                 homeHoldAppKeys.get(event.getKeyCode()))) return true;
+        // TCL's Apps button (keycode 4082, TCL_RC802VEM): the firmware starts the stock launcher's apps view, which is
+        // disabled once this launcher is Home, so on Home it opens the App library instead (every installed app).
+        if (resumed && event.getKeyCode() == TCL_APPS_KEY && !reordering) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0 && appLibrary == null) {
+                onLibraryRequested();
+            }
+            return true;
+        }
         if (handleSettingsKey(event)) return true;
         if (holdOk(event)) return true;
         if (tileMenuEnabled && !reordering && openPopup == null && cardPrompt == null
@@ -2761,8 +2813,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             greeting.setText(festiveGreeting);
             greeting.setTextColor(liftTowardsWhite(festival.accentColor(), 0.25f));
         } else {
-            greeting.setText(greetingName.isEmpty() ? getString(res)
-                    : getString(R.string.greeting_with_name, getString(res), greetingName));
+            if (!greetingName.isEmpty() && getResources().getBoolean(R.bool.varied_greetings)) {
+                Calendar now = Calendar.getInstance();
+                greeting.setText(Look.greeting(this, hour, now.get(Calendar.DAY_OF_YEAR), greetingName));
+            } else {
+                greeting.setText(greetingName.isEmpty() ? getString(res)
+                        : getString(R.string.greeting_with_name, getString(res), greetingName));
+            }
             greeting.setTextColor(greetingColor);
         }
         if (shamsi) shamsiDate.setText(Shamsi.today(getResources()));
